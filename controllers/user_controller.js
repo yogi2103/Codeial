@@ -1,8 +1,11 @@
 const User=require('../models/user');
 module.exports.profile=function(req,res){
-    res.render('User_profile',{
-        title:"Jhakas!😂"
-    });
+    User.findById(req.params.id,function(err,users){
+        res.render('User_profile',{
+        title:"Jhakas!😂",
+        profile_user:users    
+    })
+})
 }
 
 module.exports.signup=function(req,res){
@@ -51,4 +54,12 @@ module.exports.createSession=function(req,res){
 module.exports.destroySession=function(req,res){
     req.logout();
     return res.redirect('/');
+}
+
+module.exports.update=function(req,res){
+    if(req.user.id==req.params.id){
+        User.findByIdAndUpdate(req.params.id,req.body,function(err,user){
+            return res.redirect('back');
+        })
+    }
 }

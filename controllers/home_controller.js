@@ -1,13 +1,15 @@
 const Post=require('../models/post');
 const Comment=require('../models/comment');
-module.exports.home=function(req,res){
+const User=require('../models/user');
+module.exports.home=async function(req,res){
     // Post.find({},function(err,posts){
     //     return res.render('home',{
     //         title: 'Home',
     //         posts:posts
     //     });
     // })
-    Post.find({})
+    try{
+        let posts=await Post.find({})
     .populate('user')
     .populate({
         path:'comments',
@@ -15,10 +17,15 @@ module.exports.home=function(req,res){
             path:'user'
         }
     })
-    .exec(function(err,posts){
-        return res.render('home',{
-            title: 'Home',
-            posts:posts
-        })
-})
+   let users=await User.find({});
+   return res.render('home',{
+    title: 'Home',
+    posts:posts,
+    all_users:users
+    }); 
+    }
+    catch(err){
+        console.log(err);
+        return;
+    }
 }
