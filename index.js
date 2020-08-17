@@ -8,6 +8,8 @@ const session=require('express-session');       //used for session cookie
 const passport=require('passport');
 const passportLocal=require('./config/passport-local-strategy');
 const MongoStore=require('connect-mongo')(session);
+const flash=require('connect-flash');
+const customMware=require('./config/middleware');
 //for reading through post requests
 app.use(express.urlencoded());
 app.use(cookieParser());    
@@ -52,6 +54,11 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use(passport.setAuthenticatedUser); //check for if user is already logged in(session cookie is present or not)
+
+app.use(flash());
+
+//For using the custom middle ware
+app.use(customMware.setFlash);
 
 //use express router 
 app.use('/',require('./routes/index'));

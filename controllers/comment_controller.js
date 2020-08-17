@@ -1,20 +1,26 @@
 const Comment=require('../models/comment');
 const Post=require('../models/post');
-module.exports.create=function(req,res){
-    Post.findById(req.body.post /*(in home.ejs name is ejs in comment section type is hidden)*/,function(err,post){
+module.exports.create=async function(req,res){
+    let post=await Post.findById(req.body.post /*(in home.ejs name is ejs in comment section type is hidden)*/);
+    try{
         if(post){
-            Comment.create({
+            let comment=await Comment.create({
                 comment:req.body.content,
                 post:req.body.post,
                 user:req.user._id
-            },function(err,comment){
-                post.comments.push(comment);
-                post.save();
-
-                res.redirect('/');
-            })
+            });    
+            post.comments.push(comment);
+            post.save();
+            res.redirect('/');
         }
-    })
+        else{
+            return res.redirect('/');
+        }
+        }
+    catch(err){
+        console.log(err);
+        return;
+    }
 }
 
 module.exports.destroy=function(req,res){
