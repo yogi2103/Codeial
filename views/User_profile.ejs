@@ -1,7 +1,9 @@
 <h1>Codeial/ Profile Page</h1>
+<img src="<%= user.avatar%>" alt="<%=user.name%>" width="100">
 <%if(locals.user.id==profile_user.id){%>
-    <form action="/users/update/<%=profile_user.id%>" method="POST">
+    <form action="/users/update/<%=profile_user.id%>" enctype="multipart/form-data"method="POST">
         <input type="email" name="email" value="<%=profile_user.email%>">
+        <input type="file" name="avatar" id="Profile picture">
         <input type="submit" name="Update">
     </form>
 <%}%>

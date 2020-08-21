@@ -1,4 +1,7 @@
 const User=require('../models/user');
+const fs=require('fs');
+const path=require('path');
+
 module.exports.profile=function(req,res){
     User.findById(req.params.id,function(err,users){
         res.render('User_profile',{
@@ -58,10 +61,38 @@ module.exports.destroySession=function(req,res){
     return res.redirect('/');
 }
 
-module.exports.update=function(req,res){
+module.exports.update=async function(req,res){
+    // if(req.user.id==req.params.id){
+    //     User.findByIdAndUpdate(req.params.id,req.body,function(err,user){
+    //         return res.redirect('back');
+    //     })
+    // }
     if(req.user.id==req.params.id){
-        User.findByIdAndUpdate(req.params.id,req.body,function(err,user){
-            return res.redirect('back');
-        })
+        try{
+            let user= await User.findById(req.params.id);
+            User.uploadedAvatar(req,res,function(err){
+                if(err){
+                    console.log('Multer error',err);
+                }
+                user.email=req.body.email;
+                if(req.file){
+
+                    //to check if there's already an avatar then replace the current one(remove it)
+                    if(user.avatar){
+                        fs.unlinkSync(path.join(__dirname,'..',user.avatar))
+                    }
+                    //saving the path of uploaded file into the avatar field in user schema
+                    user.avatar=User.avatarPath +'/'+req.file.filename;
+                }
+                user.save();
+                return res.redirect('back');
+                //console.log(req.file);
+            });
+
+        }
+        catch(err){
+            console.log(err);
+            return;
+        }
     }
 }
