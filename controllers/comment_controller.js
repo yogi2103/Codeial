@@ -1,5 +1,6 @@
 const Comment=require('../models/comment');
 const Post=require('../models/post');
+const comments_mailer=require('../mailers/comments_mailer');
 module.exports.create=async function(req,res){
     let post=await Post.findById(req.body.post /*(in home.ejs name is ejs in comment section type is hidden)*/);
     try{
@@ -8,9 +9,11 @@ module.exports.create=async function(req,res){
                 comment:req.body.content,
                 post:req.body.post,
                 user:req.user._id
-            });    
+            });
             post.comments.push(comment);
             post.save();
+            comment=await comment.populate('user','name email').execPopulate();     
+            comments_mailer.newComment(comment);
             res.redirect('/');
         }
         else{
