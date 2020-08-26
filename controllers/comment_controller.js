@@ -1,6 +1,8 @@
 const Comment=require('../models/comment');
 const Post=require('../models/post');
 const comments_mailer=require('../mailers/comments_mailer');
+const queue=require('../config/kue');
+const commentEmailWorker=require('../workers/comment_email_worker');
 module.exports.create=async function(req,res){
     let post=await Post.findById(req.body.post /*(in home.ejs name is ejs in comment section type is hidden)*/);
     try{
@@ -12,8 +14,16 @@ module.exports.create=async function(req,res){
             });
             post.comments.push(comment);
             post.save();
+            //we have populated it so it doesn't give recepient error and names of user in new_comment.ejs
             comment=await comment.populate('user','name email').execPopulate();     
-            comments_mailer.newComment(comment);
+            //comments_mailer.newComment(comment);
+            let job=queue.create('emails',comment).save(function(err){
+                if(err){
+                    console.log('error in creating a queue');
+                    return;
+                }
+                console.log(job.id);
+            }); 
             res.redirect('/');
         }
         else{
